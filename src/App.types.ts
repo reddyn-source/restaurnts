@@ -1,4 +1,4 @@
-export type Restuarnt = {
+export interface IRestuarnt {
     address1:string,
     attire:string,
     city:string,
@@ -25,4 +25,9 @@ export type Restuarnt = {
 
 
   export type FilterArray =  Array<FilterItem>
+
+  export enum SortOrder  {
+    Ascending = 'Ascending',
+    Desending = 'Desending'
+}
 

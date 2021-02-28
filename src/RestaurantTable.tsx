@@ -1,67 +1,144 @@
 import * as React from 'react'
-import { FilterArray,FilterTypes, FilterItem, Restuarnt } from './App.types'
+import { FilterArray, FilterTypes, FilterItem, IRestuarnt, SortOrder } from './App.types'
+
+import './RestaurantTable.css'
 
 type ITableProps = {
-    restaurnts: Restuarnt[]
+    restaurnts: IRestuarnt[]
     stateQuery: string,
     genreQuery: string,
-    searchQuery:string,
-    onInputChange:(event: React.ChangeEvent<HTMLInputElement>) => void
-    filterArray: FilterArray
+    searchQuery: string,
+    onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    filterArray: FilterArray,
+    onCoulumnHeaderClick: (event: React.MouseEvent<HTMLTableHeaderCellElement>) => void,
+    sortColumn: string,
+    sortOrder: string
+}
+
+
+
+type sortcolumn = 'name' | 'state'
+
+enum paginationButton {
+    left = "left",
+    right = 'right'
 }
 
 export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
-    const { stateQuery = '', genreQuery = '' , searchQuery='', onInputChange, filterArray:filterRespectively ,restaurnts } = props
+    const {
+        stateQuery = '',
+        genreQuery = '',
+        searchQuery = '',
+        onInputChange,
+        filterArray: filterRespectively,
+        restaurnts,
+        onCoulumnHeaderClick,
+        sortColumn,
+        sortOrder
+    } = props
+
+    const [startIndex, setStartIndex] = React.useState(0)
+
     const filteredRestaurnts = React.useMemo(() => {
-    let  locallyFilteredRestaurnts:Restuarnt[] = []
-      if(filterRespectively.length>0){
-         filterRespectively.forEach((filterBy:FilterItem)=>{
-            if(filterBy === FilterTypes.byGenres) {
-                const toUseArrayToFilter =  locallyFilteredRestaurnts.length>0 ?locallyFilteredRestaurnts : restaurnts
-                 const filteredByGenres =  toUseArrayToFilter.filter((item:Restuarnt)=>{
-                    return item.genre.toLowerCase().includes(genreQuery.toLowerCase())
-                })
-                locallyFilteredRestaurnts = [...filteredByGenres]
-            }  
-            else if(filterBy === FilterTypes.byState) {
-                const toUseArrayToFilter =  locallyFilteredRestaurnts.length>0 ?locallyFilteredRestaurnts : restaurnts
-                const filteredByState =  toUseArrayToFilter.filter((item:Restuarnt)=>{
-                    return item.state.toLowerCase().includes(stateQuery.toLowerCase())
-                })
-                locallyFilteredRestaurnts = [...filteredByState]
-            } 
-            else {
-                const toUseArrayToFilter =  locallyFilteredRestaurnts.length>0 ?locallyFilteredRestaurnts : restaurnts
-                const filteredBySearch =  toUseArrayToFilter.filter((item:Restuarnt)=>{
-                    return (
-                        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                        ||
-                        item.city.toLowerCase().includes(searchQuery.toLowerCase())
-                        ||
-                        item.genre.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                })
-                locallyFilteredRestaurnts = [...filteredBySearch]
-            }
-        })
-        return locallyFilteredRestaurnts
-      } else {
-        return restaurnts
-      }
-    }, [stateQuery, genreQuery, searchQuery])
-    const sortedRestaurants = [...filteredRestaurnts].sort((a: Restuarnt, b: Restuarnt) => {
-        return a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1
+        let locallyFilteredRestaurnts: IRestuarnt[] = []
+        if (filterRespectively.length > 0) {
+            filterRespectively.forEach((filterBy: FilterItem) => {
+                const toUseArrayToFilter = locallyFilteredRestaurnts.length > 0 ? locallyFilteredRestaurnts : restaurnts
+                if (filterBy === FilterTypes.byGenres) {
+                    const filteredByGenres = toUseArrayToFilter.filter((item: IRestuarnt) => {
+                        return item.genre.toLowerCase().includes(genreQuery.toLowerCase())
+                    })
+                    locallyFilteredRestaurnts = [...filteredByGenres]
+                }
+                else if (filterBy === FilterTypes.byState) {
+
+                    const filteredByState = toUseArrayToFilter.filter((item: IRestuarnt) => {
+                        return item.state.toLowerCase().includes(stateQuery.toLowerCase())
+                    })
+                    locallyFilteredRestaurnts = [...filteredByState]
+                }
+                else {
+                    const filteredBySearch = toUseArrayToFilter.filter((item: IRestuarnt) => {
+                        return (
+                            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                            ||
+                            item.city.toLowerCase().includes(searchQuery.toLowerCase())
+                            ||
+                            item.genre.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
+                    })
+                    locallyFilteredRestaurnts = [...filteredBySearch]
+                }
+            })
+            return locallyFilteredRestaurnts
+        } else {
+            return restaurnts
+        }
+    }, [stateQuery, genreQuery, searchQuery, restaurnts, filterRespectively])
+
+
+    const sortedRestaurants = [...filteredRestaurnts].sort((a: IRestuarnt, b: IRestuarnt) => {
+        if (sortOrder === SortOrder.Ascending) {
+            return a[sortColumn as sortcolumn].toUpperCase() > b[sortColumn as sortcolumn].toUpperCase() ? 1 : -1
+        } else {
+            return a[sortColumn as sortcolumn].toUpperCase() < b[sortColumn as sortcolumn].toUpperCase() ? 1 : -1
+        }
     })
+
+    const sortArrow = sortOrder === SortOrder.Ascending ? String.fromCharCode(8595) : String.fromCharCode(8593)
+
+    const [currentPage, setCurrentPage] = React.useState(1)
+    const maxPages = Math.ceil(filteredRestaurnts.length / 10)
+    const onPaginationButtonClicked = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const arrow = (event.target as HTMLButtonElement).dataset['arrow']
+        if (arrow === paginationButton.left) {
+            setCurrentPage(currentPage - 1)
+            setStartIndex(startIndex - 10)
+        } else {
+            setCurrentPage(currentPage + 1)
+            setStartIndex(startIndex + 10)
+        }
+    }
+    React.useEffect(() => {
+        setCurrentPage(1)
+        setStartIndex(0)
+    }, [filteredRestaurnts])
+
     return (
         <>
-        <input type="text" value={searchQuery} data-field={FilterTypes.bySearch} onChange={onInputChange}/>
+            <div className="inputsearchcontainer">
+                <div>
+                    <b>
+                    note: search and filter will perform action on all pages instead of current page and will show the result
+                    </b>
+                </div>
+                <input
+                    type="text"
+                    value={searchQuery}
+                    data-field={FilterTypes.bySearch}
+                    onChange={onInputChange}
+                    placeholder={'search by name or city or genre'}
+                />
+            </div>
             {
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th
+                                onClick={onCoulumnHeaderClick}
+                                data-column={'name'}
+                                data-sort={sortOrder}
+                            >
+                                {`Name  ${sortColumn === 'name' ? sortArrow : ''}`}
+                            </th>
                             <th>City</th>
-                            <th>State</th>
+                            <th
+                                onClick={onCoulumnHeaderClick}
+                                data-column={'state'}
+                                data-sort={sortOrder}
+                            >
+                                {`State  ${sortColumn === 'state' ? sortArrow : ''}`}
+                            </th>
                             <th>Phone number</th>
                             <th>Genres</th>
                         </tr>
@@ -71,27 +148,81 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                             <td />
                             <td />
                             <td>
-                                <input type="text" value={stateQuery} data-field={FilterTypes.byState} onChange={onInputChange} />
+                                <input
+                                    type="text"
+                                    value={stateQuery}
+                                    data-field={FilterTypes.byState}
+                                    onChange={onInputChange}
+                                    placeholder={'filter by state'}
+                                />
                             </td>
                             <td />
                             <td>
-                                <input type="text" value={genreQuery}  data-field={FilterTypes.byGenres} onChange={onInputChange}  />
+                                <input
+                                    type="text"
+                                    value={genreQuery}
+                                    data-field={FilterTypes.byGenres}
+                                    onChange={onInputChange}
+                                    placeholder={'filter by genre'}
+                                />
                             </td>
                         </tr>
                         {
-                            sortedRestaurants.map((restaurant: Restuarnt) => {
-                                return (
-                                    <tr key={restaurant.id}>
-                                        <td>{restaurant.name}</td>
-                                        <td>{restaurant.city}</td>
-                                        <td>{restaurant.state}</td>
-                                        <td>{restaurant.telephone}</td>
-                                        <td>{restaurant.genre}</td>
-                                    </tr>
-                                )
-                            })
+                            (() => {
+                                const item: React.ReactNode[] = []
+                                for (let i = startIndex; i < startIndex + 10; i++) {
+                                    if (i >= sortedRestaurants.length) break;
+                                    item.push(
+                                        <tr key={sortedRestaurants[i].id}>
+                                            <td
+                                                title={sortedRestaurants[i].name}
+                                            >
+                                                {sortedRestaurants[i].name}
+                                            </td>
+                                            <td
+                                                title={sortedRestaurants[i].city}
+                                            >
+                                                {sortedRestaurants[i].city
+                                                }
+                                            </td>
+                                            <td
+                                                title={sortedRestaurants[i].state}
+                                            >
+                                                {sortedRestaurants[i].state}
+                                            </td>
+                                            <td
+                                                title={sortedRestaurants[i].telephone}
+                                            >
+                                                {sortedRestaurants[i].telephone}
+                                            </td>
+                                            <td
+                                                title={sortedRestaurants[i].genre}
+                                            >
+                                                {sortedRestaurants[i].genre}
+                                            </td>
+                                        </tr>)
+                                }
+                                return item
+                            })()
                         }
                     </tbody>
+                    <tfoot>
+                        <button
+                            onClick={onPaginationButtonClicked}
+                            data-arrow={paginationButton.left}
+                            disabled={currentPage === 1}
+                        >
+                            {'<'}
+                        </button>
+                        <span>{` ${currentPage} of ${maxPages}`} </span>
+                        <button
+                            onClick={onPaginationButtonClicked}
+                            data-arrow={paginationButton.right}
+                            disabled={currentPage === maxPages}
+                        >
+                            {'>'}
+                        </button>
+                    </tfoot>
                 </table>
             }
         </>
