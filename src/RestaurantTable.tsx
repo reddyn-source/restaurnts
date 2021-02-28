@@ -121,7 +121,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
             <div className="inputsearchcontainer">
                 <div>
                     <b>
-                        note: search and filter will perform action on all pages instead of current page and will show the result
+                        note:sort, search and filter will perform action on all pages instead of current page and will show the result
                     </b>
                 </div>
                 <input
