@@ -130,6 +130,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                     data-field={FilterTypes.bySearch}
                     onChange={onInputChange}
                     placeholder={'search by name or city or genre'}
+                    data-testid='searchbox'
                 />
             </div>
             {
@@ -140,6 +141,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                                 onClick={onCoulumnHeaderClick}
                                 data-column={'name'}
                                 data-sort={sortOrder}
+                                data-testid="namecolumn"
                             >
                                 {`Name  ${sortColumn === 'name' ? sortArrow : ''}`}
                             </th>
@@ -148,6 +150,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                                 onClick={onCoulumnHeaderClick}
                                 data-column={'state'}
                                 data-sort={sortOrder}
+                                data-testid="statecolumn"
                             >
                                 {`State  ${sortColumn === 'state' ? sortArrow : ''}`}
                             </th>
@@ -166,6 +169,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                                     data-field={FilterTypes.byState}
                                     onChange={onInputChange}
                                     placeholder={'filter by state'}
+                                    data-testid={'statefilter'}
                                 />
                             </td>
                             <td />
@@ -176,6 +180,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                                     data-field={FilterTypes.byGenres}
                                     onChange={onInputChange}
                                     placeholder={'filter by genre'}
+                                    data-testid={'genrefilter'}
                                 />
                             </td>
                         </tr>
@@ -190,6 +195,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                                             onClickCapture={onRowClick}
                                             data-rowid={sortedRestaurants[i].id}
                                             tabIndex={0}
+                                            data-testid="tablerow"
                                         >
                                             <td
                                                 title={sortedRestaurants[i].name}
