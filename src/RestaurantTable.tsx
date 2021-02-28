@@ -1,5 +1,8 @@
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 import { FilterArray, FilterTypes, FilterItem, IRestuarnt, SortOrder } from './App.types'
+
+import { ExtraInformation } from './ExtraInfo'
 
 import './RestaurantTable.css'
 
@@ -38,7 +41,16 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
     } = props
 
     const [startIndex, setStartIndex] = React.useState(0)
-
+    const [openPopUp, setOpenPopUp] = React.useState(false)
+    const [popUpContent, setPopUpContent] = React.useState<IRestuarnt>()
+    const onRowClick = (event: React.MouseEvent<HTMLTableRowElement>) => {
+        const id = (event.currentTarget as HTMLTableRowElement).dataset['rowid']
+        setPopUpContent(restaurnts.filter((item: IRestuarnt) => item.id === id)[0])
+        setOpenPopUp(true)
+    }
+    const onClosePopUp = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setOpenPopUp(false)
+    }
     const filteredRestaurnts = React.useMemo(() => {
         let locallyFilteredRestaurnts: IRestuarnt[] = []
         if (filterRespectively.length > 0) {
@@ -109,7 +121,7 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
             <div className="inputsearchcontainer">
                 <div>
                     <b>
-                    note: search and filter will perform action on all pages instead of current page and will show the result
+                        note: search and filter will perform action on all pages instead of current page and will show the result
                     </b>
                 </div>
                 <input
@@ -173,7 +185,12 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                                 for (let i = startIndex; i < startIndex + 10; i++) {
                                     if (i >= sortedRestaurants.length) break;
                                     item.push(
-                                        <tr key={sortedRestaurants[i].id}>
+                                        <tr
+                                            key={sortedRestaurants[i].id}
+                                            onClickCapture={onRowClick}
+                                            data-rowid={sortedRestaurants[i].id}
+                                            tabIndex={0}
+                                        >
                                             <td
                                                 title={sortedRestaurants[i].name}
                                             >
@@ -200,30 +217,50 @@ export const RestaurntTable: React.FC<ITableProps> = (props: ITableProps) => {
                                             >
                                                 {sortedRestaurants[i].genre}
                                             </td>
-                                        </tr>)
+                                        </tr>
+                                    )
                                 }
                                 return item
                             })()
                         }
+
                     </tbody>
-                    <tfoot>
-                        <button
-                            onClick={onPaginationButtonClicked}
-                            data-arrow={paginationButton.left}
-                            disabled={currentPage === 1}
-                        >
-                            {'<'}
-                        </button>
-                        <span>{` ${currentPage} of ${maxPages}`} </span>
-                        <button
-                            onClick={onPaginationButtonClicked}
-                            data-arrow={paginationButton.right}
-                            disabled={currentPage === maxPages}
-                        >
-                            {'>'}
-                        </button>
-                    </tfoot>
+                    {
+                        maxPages > 0 && <tfoot>
+                            <tr>
+                                <td>
+                                    <button
+                                        onClick={onPaginationButtonClicked}
+                                        data-arrow={paginationButton.left}
+                                        disabled={currentPage === 1}
+                                    >
+                                        {'<'}
+                                    </button>
+                                    <span>{` ${currentPage} of ${maxPages}`} </span>
+                                    <button
+                                        onClick={onPaginationButtonClicked}
+                                        data-arrow={paginationButton.right}
+                                        disabled={currentPage === maxPages}
+                                    >
+                                        {'>'}
+                                    </button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    }
+
                 </table>
+            }
+            {!!openPopUp && createPortal(<ExtraInformation
+                onClose={onClosePopUp}
+                data={popUpContent!}
+            />, document.body)}
+            {
+                maxPages === 0 && (
+                    <p className="noitem">
+                        {'sorry no items to show please clear search 🤟'}
+                    </p>
+                )
             }
         </>
     )

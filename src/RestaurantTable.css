@@ -11,6 +11,15 @@ th {
     background-color: green;
     text-align: center;
 }
+
+tr[data-rowid]{
+ cursor: pointer;
+}
+
+tr[data-rowid]:hover, tr[data-rowid]:focus{
+   background-color: rgb(87, 168, 87);
+  
+}
 thead>tr>th:nth-child(1) {
     cursor: pointer;
 }
@@ -61,4 +70,8 @@ td >input {
 }
 .inputsearchcontainer > input {
     width: 500px;
+}
+
+.noitem{
+    text-align: center;
 }
