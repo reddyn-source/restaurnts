@@ -1,0 +1,64 @@
+ td{
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+
+th {
+    background-color: green;
+    text-align: center;
+}
+thead>tr>th:nth-child(1) {
+    cursor: pointer;
+}
+
+thead>tr>th:nth-child(3) {
+    cursor: pointer;
+}
+tbody>tr>td:nth-child(1){
+    width: 200px;
+    max-width: 200px;
+}
+tbody>tr>td:nth-child(2){
+    width: 150px;
+    max-width: 150px;
+}
+tbody>tr>td:nth-child(3){
+    width: 150px;
+    max-width: 150px;
+}
+tbody>tr>td:nth-child(4){
+    width: 200px;
+    max-width: 200px;
+}
+tbody>tr>td:nth-child(5){
+    width: 440px;
+    max-width: 440px;
+}
+tbody>tr:nth-child(n+2) {
+    background-color: lightgreen;
+}
+tbody>tr:nth-child(2n+3) {
+    background-color:lightgrey
+}
+
+tbody {
+    min-height: 600px;
+}
+
+td >input {
+    width: calc(100% - 10px);
+    margin: 0;
+    padding: 0 ,10;
+    box-sizing: border-box;
+}
+
+.inputsearchcontainer {
+    margin-bottom: 10px;
+}
+.inputsearchcontainer > input {
+    width: 500px;
+}
